@@ -24,11 +24,14 @@ int	authenticate(const char *, const char *);
 void	generate_hd(unsigned char *, char *, size_t );
 void	handle_request(const int, int, char *);
 void	execute_instructions(const char *);
-void	logrequest(const char *, char *);
+void	logrequest(const char *, const char *, const int, const char *,
+		const char *);
 
-static const char SUCCESS[] = "0:SUCCESS:EOM:\n";
-static const char AUTH_FAIL[] = "1:AUTH_FAIL:EOM:\n";
-static const char REQ_FAIL[] = "2:REQ_FAIL:EOM:\n";
+static const char *RESPONSE[] = {
+	"0:SUCCESS:EOM:\n",
+	"1:AUTH_FAIL:EOM:\n",
+	"2:REQ_FAIL:EOM:\n"
+};
 
 /* program starts here */
 void
@@ -56,7 +59,7 @@ score_loop(int socket, char *logpath)
 					passwd_hash);
 		handle_request(status_code, connection, requestbuf);
 		
-		logrequest(client_name, logpath);
+		logrequest(client_name, logpath, status_code, "", "");
 
 		close(connection);
 	}
@@ -122,25 +125,27 @@ authenticate(const char real_pw_hash[SHA512_DIGEST_LENGTH],
 		free(tmp);
 	}
 
-	if (strcmp(real_pw_hash, client_pw_hash)) {
-		logrequest(SUCCESS, "/var/log/scored.log");
+	if (strcmp(real_pw_hash, client_pw_hash))
 		return 1;
-	} else {
-		logrequest(AUTH_FAIL, "/var/log/scored.log");
+	else
 		return 0;
-	}
 }
 
 void
 handle_request(const int status, int consocket, char *request)
 {
-	if (status == 0) {
+	switch (status) {
+	case 0:
 		execute_instructions(request);
-		send(consocket, SUCCESS, strlen(SUCCESS), 0);
-	} else if (status == 1) {
-		send(consocket, AUTH_FAIL, strlen(AUTH_FAIL), 0);
-	} else if (status == 2)
-		send(consocket, REQ_FAIL, strlen(REQ_FAIL), 0);
+		send(consocket, RESPONSE[0], strlen(RESPONSE[0]), 0);
+		break;
+	case 1:
+		send(consocket, RESPONSE[1], strlen(RESPONSE[1]), 0);
+		break;
+	case 2:
+		send(consocket, RESPONSE[2], strlen(RESPONSE[2]), 0);
+		break;
+	}
 }
 
 void
@@ -153,7 +158,8 @@ execute_instructions(const char *static_instructions)
 }
 
 void
-logrequest(const char *msg, char *log)
+logrequest(const char *client, const char *log, const int status,
+		const char *pt_change, const char *awarded_for)
 {
 	FILE *fp;
 	time_t since_epoch;
@@ -161,7 +167,8 @@ logrequest(const char *msg, char *log)
 	fp = fopen(log, "a");
 
 	since_epoch = time(NULL);
-	fprintf(fp, "%li: %s\n", since_epoch, msg);
+	fprintf(fp, "%li:\t[%s]\t%s\t%s\t%s", since_epoch, client,
+			RESPONSE[status], pt_change, awarded_for);
 
 	fclose(fp);
 }
