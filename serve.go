@@ -76,16 +76,18 @@ func handleConnection(conn net.Conn, log *os.File) {
 
 	fmt.Fprintf(log, "Incoming connection from %s: ", conn.RemoteAddr())
 
-	readbuffer, err := ioutil.ReadAll(conn)
+	sockread_buffer, err := ioutil.ReadAll(conn)
 	if err != nil {
-		fmt.Fprintln(conn, "server read() failure: resend request")
-		fmt.Fprintln(log, "server read() failure: resend request")
+		fmt.Fprintln(conn, "failure: server error: resend request")
+		fmt.Fprintln(log, "failure: server error: resend request")
 		return
 	}
 
-	_, err = parseRequest(readbuffer)
+	_, err = parseRequest(sockread_buffer)
 	if err != nil {
-		fmt.Fprintln(conn, err)
+		fmt.Fprintln(conn, "failure:", err)
+		fmt.Fprintln(log, "failure:", err)
+		return
 	}
 }
 
