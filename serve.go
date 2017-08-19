@@ -94,9 +94,6 @@ func handleConnection(conn net.Conn, log *os.File) {
 func parseRequest(request_buffer []byte) (parsed_request, error) {
 	parsed := parsed_request{}
 	err := json.Unmarshal(request_buffer, &parsed)
-	if err != nil {
-		return parsed, err
-	}
 
-	return parsed, nil
+	return parsed, err
 }
