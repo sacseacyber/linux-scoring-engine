@@ -24,12 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
+	"reflect"
 )
 
 func readConfiguration(path string) options {
@@ -39,7 +40,24 @@ func readConfiguration(path string) options {
 	decoder := json.NewDecoder(configfile)
 	opts := options{}
 	err = decoder.Decode(&opts)
-
 	bailIfFail(err)
+
+	err = checkValidity(opts)
+	bailIfFail(err)
+
 	return opts
+}
+
+func checkValidity(opts options) error {
+	v := reflect.ValueOf(opts)
+
+	values := make([]interface{}, v.NumField())
+	for i := 0; i < v.NumField(); i++ {
+		values[i] = v.Field(i).Interface()
+		if values[i] == "" {
+			return fmt.Errorf("Invalid configuration")
+		}
+	}
+
+	return nil
 }
