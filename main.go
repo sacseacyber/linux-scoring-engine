@@ -29,6 +29,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime"
 )
 
 type options struct {
@@ -37,9 +38,26 @@ type options struct {
 }
 
 func main() {
-	conf := readConfiguration("/etc/scored.json")
+	conf_file_path := getConfFilePath()
+	conf := readConfiguration(conf_file_path)
 
 	serve(conf)
+}
+
+/* TODO account for all available Go platforms */
+func getConfFilePath() string {
+	if runtime.GOOS == "windows" {
+		/* TODO figure out where Windows keeps its config files */
+		fmt.Fprintf(os.Stderr, "No Windows support at this time\n")
+		os.Exit(1)
+	} else if runtime.GOOS == "freebsd" {
+		return "/usr/local/etc/scored.json"
+	} else if runtime.GOOS == "darwin" {
+		/* TODO make sure this is accurate */
+		return "/Library/scored.json"
+	}
+
+	return "/etc/scored.json"
 }
 
 func bailIfFail(err error) {
