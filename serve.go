@@ -85,8 +85,8 @@ func handleConnection(conn net.Conn, log *os.File) {
 
 	_, err = parseRequest(sockread_buffer)
 	if err != nil {
-		fmt.Fprintln(conn, "failure:", err)
-		fmt.Fprintln(log, "failure:", err)
+		fmt.Fprintln(conn, "failure: client error:", err)
+		fmt.Fprintln(log, "failure: client error:", err)
 		return
 	}
 }
