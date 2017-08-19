@@ -1,7 +1,14 @@
-# CyberPatriot Scoring Engine
-This will be a daemon that records points for changes in configuration and
-state on another system. It is not usable yet, but should be soon. Clients ran
-on the testing machine will connect to the server, authenticate, send
-information on scoring changes, then disconnect.
+# Cyberpatriot Scoring Engine
+This will be a program that records points for changes in configuration and
+state on another system. It is not usable yet, but should be soon. Client
+programs ran on the testing machine will authenticate and send scores which
+will be held in a database.
 
-After this is working I'll work on documentation.
+# Roadmap
+* Make it work
+
+* Use a database (probably SQLite) to store the scoring information
+
+* Set up an authentication scheme
+
+* Make TLS an option to secure communication
