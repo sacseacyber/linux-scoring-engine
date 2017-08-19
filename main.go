@@ -33,8 +33,9 @@ import (
 )
 
 type options struct {
-	BindAddr string
-	LogFile  string
+	BindAddr       string
+	LogFile        string
+	ScoreCacheFile string
 }
 
 func main() {
