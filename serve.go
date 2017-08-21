@@ -48,8 +48,10 @@ func serve(opts options) {
 }
 
 func initLog(logpath string, addr string) *os.File {
-	file, err := os.OpenFile(logpath, os.O_RDWR|os.O_APPEND, 0600)
+	file, err := os.OpenFile(logpath, os.O_RDWR|os.O_APPEND|os.O_CREATE,
+		0644)
 	bailIfFail(err)
+
 	_, err = fmt.Fprintf(file, "Initializing cyberpatriot scoring server: bound to \"%s\"\n", addr)
 	bailIfFail(err)
 
@@ -60,12 +62,14 @@ func initLog(logpath string, addr string) *os.File {
  * proper request is in JSON, like below:
  *
  * {
+ *	"reqtype":"put",
  * 	"service":"sshd",
  * 	"pointchange":2,
  * 	"reason":"disabled auth without keys"
  * }
  */
 type parsed_request struct {
+	Reqtype     string
 	Service     string
 	PointChange int
 	Reason      string
@@ -83,15 +87,24 @@ func handleConnection(conn net.Conn, log *os.File) {
 		return
 	}
 
-	_, err = parseRequest(sockread_buffer)
+	reqdata, err := extractRequestData(sockread_buffer)
 	if err != nil {
 		fmt.Fprintln(conn, "failure: client error:", err)
 		fmt.Fprintln(log, "failure: client error:", err)
 		return
 	}
+
+	fmt.Fprintln(conn, "success")
+	fmt.Fprintln(log, "success")
+
+	if reqdata.Reqtype == "GET" {
+		/* query database */
+	} else if reqdata.Reqtype == "PUT" {
+		/* add info to database */
+	}
 }
 
-func parseRequest(request_buffer []byte) (parsed_request, error) {
+func extractRequestData(request_buffer []byte) (parsed_request, error) {
 	parsed := parsed_request{}
 	err := json.Unmarshal(request_buffer, &parsed)
 

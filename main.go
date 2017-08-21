@@ -28,6 +28,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"runtime"
 )
@@ -63,7 +64,6 @@ func getConfFilePath() string {
 
 func bailIfFail(err error) {
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }
