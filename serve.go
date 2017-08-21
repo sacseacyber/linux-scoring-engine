@@ -97,8 +97,8 @@ func handleConnection(conn net.Conn, log *os.File) {
 
 	_, err = getRequestType(reqdata.Reqtype)
 	if err != nil {
-		fmt.Fprintln(conn, "failure: invalid request type")
-		fmt.Fprintln(log, "failure: invalid request type")
+		fmt.Fprintln(conn, "failure: client error:", err)
+		fmt.Fprintln(log, "failure: client error:", err)
 		return
 	}
 
@@ -116,7 +116,9 @@ func extractRequestData(request_buffer []byte) (parsed_request, error) {
 func getRequestType(reqtype string) (string, error) {
 	if strings.ToUpper(reqtype) == "GET" || strings.ToUpper(reqtype) == "PUT" {
 		return reqtype, nil
+	} else if reqtype == "" {
+		return "", fmt.Errorf("no request type specified")
 	}
 
-	return "", nil
+	return "", fmt.Errorf("invalid request type")
 }
