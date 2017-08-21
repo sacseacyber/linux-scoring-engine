@@ -32,6 +32,7 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"strings"
 )
 
 func serve(opts options) {
@@ -94,14 +95,15 @@ func handleConnection(conn net.Conn, log *os.File) {
 		return
 	}
 
+	_, err = getRequestType(reqdata.Reqtype)
+	if err != nil {
+		fmt.Fprintln(conn, "failure: invalid request type")
+		fmt.Fprintln(log, "failure: invalid request type")
+		return
+	}
+
 	fmt.Fprintln(conn, "success")
 	fmt.Fprintln(log, "success")
-
-	if reqdata.Reqtype == "GET" {
-		/* query database */
-	} else if reqdata.Reqtype == "PUT" {
-		/* add info to database */
-	}
 }
 
 func extractRequestData(request_buffer []byte) (parsed_request, error) {
@@ -109,4 +111,12 @@ func extractRequestData(request_buffer []byte) (parsed_request, error) {
 	err := json.Unmarshal(request_buffer, &parsed)
 
 	return parsed, err
+}
+
+func getRequestType(reqtype string) (string, error) {
+	if strings.ToUpper(reqtype) == "GET" || strings.ToUpper(reqtype) == "PUT" {
+		return reqtype, nil
+	}
+
+	return "", nil
 }
