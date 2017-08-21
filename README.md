@@ -7,8 +7,6 @@ that are held in a database.
 # Roadmap
 * Make it work
 
-* Use a database (probably SQLite) to store the scoring information
-
 * Set up an authentication scheme
 
 * Make TLS an option to secure communication
