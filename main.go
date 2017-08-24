@@ -53,13 +53,13 @@ func getConfFilePath() string {
 		fmt.Fprintf(os.Stderr, "No Windows support at this time\n")
 		os.Exit(1)
 	} else if runtime.GOOS == "freebsd" {
-		return "/usr/local/etc/scored.json"
+		return "/usr/local/etc/linux-scoring-engine.json"
 	} else if runtime.GOOS == "darwin" {
 		/* TODO make sure this is accurate */
-		return "/Library/scored.json"
+		return "/Library/linux-scoring-engine.json"
 	}
 
-	return "/etc/scored.json"
+	return "/etc/linux-scoring-engine.json"
 }
 
 func bailIfFail(err error) {
