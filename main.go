@@ -34,9 +34,13 @@ import (
 )
 
 type options struct {
-	BindAddr    string
-	LogFile     string
-	ScoreDBFile string
+	BindAddr       string
+	LogFile        string
+	MySQL_Database string
+	MySQL_Host     string
+	MySQL_Password string
+	MySQL_Table    string
+	MySQL_User     string
 }
 
 func main() {

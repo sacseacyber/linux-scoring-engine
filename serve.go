@@ -27,15 +27,22 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 )
 
 func serve(opts options) {
+	db, err := openMySQLConnection(opts.MySQL_User,
+		opts.MySQL_Password, "", opts.MySQL_Host,
+		opts.MySQL_Database)
+	bailIfFail(err)
+
 	ln, err := net.Listen("tcp", opts.BindAddr)
 	bailIfFail(err)
 
@@ -44,7 +51,7 @@ func serve(opts options) {
 	for {
 		conn, _ := ln.Accept()
 
-		go handleConnection(conn, log)
+		go handleConnection(conn, log, db, opts.MySQL_Table)
 	}
 }
 
@@ -76,7 +83,7 @@ type parsed_request struct {
 	Reason      string
 }
 
-func handleConnection(conn net.Conn, log *os.File) {
+func handleConnection(conn net.Conn, log *os.File, db *sql.DB, table string) {
 	defer conn.Close()
 
 	fmt.Fprintf(log, "Incoming connection from %s: ", conn.RemoteAddr())
@@ -95,15 +102,26 @@ func handleConnection(conn net.Conn, log *os.File) {
 		return
 	}
 
-	_, err = getRequestType(reqdata.Reqtype)
+	reqtype, err := getRequestType(reqdata.Reqtype)
 	if err != nil {
 		fmt.Fprintln(conn, "failure: client error:", err)
 		fmt.Fprintln(log, "failure: client error:", err)
 		return
 	}
 
+	if reqtype == "PUT" {
+		err := insertRequestData(db, table, conn.RemoteAddr().String(),
+			reqdata)
+		if err != nil {
+			fmt.Fprintln(conn, "failure: db error:", err)
+			fmt.Fprintln(log, "failure: db error:", err)
+			return
+		}
+	}
+
 	fmt.Fprintln(conn, "success")
 	fmt.Fprintln(log, "success")
+	return
 }
 
 func extractRequestData(request_buffer []byte) (parsed_request, error) {
@@ -121,4 +139,18 @@ func getRequestType(reqtype string) (string, error) {
 	}
 
 	return "", fmt.Errorf("invalid request type")
+}
+
+func insertRequestData(db *sql.DB, table string, hostname string,
+	data parsed_request) error {
+
+	var query string
+
+	query = "INSERT INTO " + table + " (service, point, reason, host)" +
+		" VALUES " + "('" + data.Service + "', '" +
+		strconv.Itoa(data.PointChange) + "', '" + data.Reason + "', '" +
+		hostname + "');"
+
+	_, err := db.Query(query)
+	return err
 }
