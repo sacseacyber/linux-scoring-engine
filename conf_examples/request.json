@@ -1,0 +1,6 @@
+{
+	"reqtype":"PUT",
+	"service":"sshd",
+	"pointchange":1,
+	"reason":"disable root access"
+}

@@ -1,0 +1,10 @@
+{
+	"bindaddr":"0.0.0.0:30000", 
+	"logfile":"/var/log/linux-scoring-engine.log",
+
+	"mysql_host":"localhost",
+	"mysql_user":"scoring_server",
+	"mysql_password":"foobar",
+	"mysql_database":"scoring_server",
+	"mysql_table":"score"
+}
