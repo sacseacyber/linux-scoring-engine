@@ -42,3 +42,17 @@ func openMySQLConnection(user string, pass string, protocol string,
 
 	return db, err
 }
+
+func insertRequestData(db *sql.DB, table string, hostname string,
+	data parsed_request) error {
+
+	var query string
+
+	query = "INSERT INTO " + table + " (service, point, reason, host)" +
+		" VALUES " + "('" + data.Service + "', '" +
+		strconv.Itoa(data.PointChange) + "', '" + data.Reason + "', '" +
+		hostname + "');"
+
+	_, err := db.Query(query)
+	return err
+}

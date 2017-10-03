@@ -140,17 +140,3 @@ func getRequestType(reqtype string) (string, error) {
 
 	return "", fmt.Errorf("invalid request type")
 }
-
-func insertRequestData(db *sql.DB, table string, hostname string,
-	data parsed_request) error {
-
-	var query string
-
-	query = "INSERT INTO " + table + " (service, point, reason, host)" +
-		" VALUES " + "('" + data.Service + "', '" +
-		strconv.Itoa(data.PointChange) + "', '" + data.Reason + "', '" +
-		hostname + "');"
-
-	_, err := db.Query(query)
-	return err
-}
